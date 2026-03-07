@@ -70,6 +70,7 @@ public class SemaphoreExample : MonoBehaviour
 
 ```csharp
 using System;
+using System.Collections.Generic;
 using Cysharp.Threading.Tasks;
 using UniTaskPlus;
 using UnityEngine;
@@ -78,7 +79,15 @@ public class UniTaskBagExample : MonoBehaviour
 {
     private async UniTaskVoid Start()
     {
-        // タスクを収集し、バッグが破棄されるときにすべて待機する
+        // List を使う場合
+        // var list = new List<UniTask>();
+        // for (int i = 0; i < 10; i++)
+        // {
+        //     list.Add(UniTask.Delay(TimeSpan.FromSeconds(i)));
+        // }
+        // await UniTask.WhenAll(list);
+
+        // UniTaskBag を使う場合（上記と同等）
         await using (var bag = new UniTaskBag())
         {
             for (int i = 0; i < 10; i++)
