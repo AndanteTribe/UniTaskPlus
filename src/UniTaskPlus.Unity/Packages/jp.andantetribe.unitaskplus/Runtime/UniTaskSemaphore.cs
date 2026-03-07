@@ -17,8 +17,8 @@ namespace UniTaskPlus
     /// <code>
     /// <![CDATA[
     /// using System;
-    /// using AndanteTribe.Utils.Unity.Tasks;
     /// using Cysharp.Threading.Tasks;
+    /// using UniTaskPlus;
     /// using UnityEngine;
     ///
     /// public class SemaphoreExample : MonoBehaviour

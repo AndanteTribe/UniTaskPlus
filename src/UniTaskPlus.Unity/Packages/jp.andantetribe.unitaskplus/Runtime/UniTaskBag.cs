@@ -17,8 +17,8 @@ namespace UniTaskPlus
     /// <code>
     /// <![CDATA[
     /// using System;
-    /// using AndanteTribe.Utils.Unity;
     /// using Cysharp.Threading.Tasks;
+    /// using UniTaskPlus;
     /// using UnityEngine;
     ///
     /// public class Example : MonoBehaviour
@@ -83,8 +83,7 @@ namespace UniTaskPlus
             }
             finally
             {
-                _tasks.AsSpan(0, _count).Clear();
-                ArrayPool<UniTask>.Shared.Return(_tasks);
+                ArrayPool<UniTask>.Shared.Return(_tasks, true);
             }
         }
     }
