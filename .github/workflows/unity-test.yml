@@ -1,0 +1,62 @@
+name: unity-test
+on:
+  pull_request:
+    types:
+      - labeled
+  push:
+    branches:
+      - main
+    paths:
+      - src/**
+  workflow_dispatch: {}
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      checks: write
+    if: ${{ github.event_name == 'pull_request' && github.event.label.name == 'request-ci' || github.event_name == 'push' || github.event_name == 'workflow_dispatch' }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Unity Cache
+        uses: AndanteTribe/Actions/actions/unity-cache@main
+        with:
+          unity-project-path: src/UniTaskPlus.Unity
+      - name: Free disk space
+        run: |
+          curl -sL https://raw.githubusercontent.com/game-ci/docker/main/.github/workflows/scripts/free_disk_space.sh -o free_disk_space.sh
+          chmod +x free_disk_space.sh
+          ./free_disk_space.sh
+          rm -f free_disk_space.sh
+      - uses: game-ci/unity-test-runner@v4
+        id: tests
+        env:
+          UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
+          UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
+          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+        with:
+          projectPath: src/UniTaskPlus.Unity
+          githubToken: ${{ secrets.GITHUB_TOKEN }}
+          unityVersion: auto
+          testMode: playMode
+          coverageOptions: 'generateHtmlReport;generateAdditionalReports;assemblyFilters:+UniTskPlus'
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: Test results
+          path: ${{ steps.tests.outputs.artifactsPath }}
+          retention-days: 2
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: Coverage Results
+          path: ${{ steps.tests.outputs.coveragePath }}
+          retention-days: 2
+      - name: Upload Coverage Report
+        run: |
+          while IFS= read -r file; do
+            cat "$file" >> $GITHUB_STEP_SUMMARY
+          done < <(find "${{ steps.tests.outputs.coveragePath }}" -name "Summary.md" 2>/dev/null)
