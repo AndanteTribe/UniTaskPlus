@@ -24,7 +24,7 @@ namespace UniTaskPlus.Tests.Runtime
 
             pool.Grow(ref array, 10);
 
-            Assert.GreaterOrEqual(array.Length, 10);
+            Assert.That(array.Length, Is.GreaterThanOrEqualTo(10));
             pool.Return(array);
         }
 
@@ -38,9 +38,9 @@ namespace UniTaskPlus.Tests.Runtime
 
             pool.Grow(ref array, 10);
 
-            Assert.AreEqual(100, array[0]);
-            Assert.AreEqual(200, array[1]);
-            Assert.GreaterOrEqual(array.Length, 10);
+            Assert.That(array[0], Is.EqualTo(100));
+            Assert.That(array[1], Is.EqualTo(200));
+            Assert.That(array.Length, Is.GreaterThanOrEqualTo(10));
 
             pool.Return(array);
         }
@@ -53,11 +53,11 @@ namespace UniTaskPlus.Tests.Runtime
         {
             var tuple = StateTuple.Create(1);
             tuple.Deconstruct(out var item1);
-            Assert.AreEqual(1, item1);
+            Assert.That(item1, Is.EqualTo(1));
 
             var tuple2 = StateTuple.Create(2);
             tuple2.Deconstruct(out var item2);
-            Assert.AreEqual(2, item2);
+            Assert.That(item2, Is.EqualTo(2));
         }
 
         [Test]
@@ -65,13 +65,13 @@ namespace UniTaskPlus.Tests.Runtime
         {
             var tuple = StateTuple.Create(1, "A");
             tuple.Deconstruct(out var i1, out var s1);
-            Assert.AreEqual(1, i1);
-            Assert.AreEqual("A", s1);
+            Assert.That(i1, Is.EqualTo(1));
+            Assert.That(s1, Is.EqualTo("A"));
 
             var tuple2 = StateTuple.Create(2, "B");
             tuple2.Deconstruct(out var i2, out var s2);
-            Assert.AreEqual(2, i2);
-            Assert.AreEqual("B", s2);
+            Assert.That(i2, Is.EqualTo(2));
+            Assert.That(s2, Is.EqualTo("B"));
         }
 
         [Test]
@@ -79,32 +79,32 @@ namespace UniTaskPlus.Tests.Runtime
         {
             var tuple = StateTuple.Create(1, "A", 0.5f);
             tuple.Deconstruct(out var i1, out var s1, out var f1);
-            Assert.AreEqual(1, i1);
-            Assert.AreEqual("A", s1);
-            Assert.AreEqual(0.5f, f1);
+            Assert.That(i1, Is.EqualTo(1));
+            Assert.That(s1, Is.EqualTo("A"));
+            Assert.That(f1, Is.EqualTo(0.5f));
 
             var tuple2 = StateTuple.Create(2, "B", 1.5f);
             tuple2.Deconstruct(out var i2, out var s2, out var f2);
-            Assert.AreEqual(2, i2);
-            Assert.AreEqual("B", s2);
-            Assert.AreEqual(1.5f, f2);
+            Assert.That(i2, Is.EqualTo(2));
+            Assert.That(s2, Is.EqualTo("B"));
+            Assert.That(f2, Is.EqualTo(1.5f));
         }
     }
 
     public class UniTaskNodeTests
     {
         [UnityTest]
-        public IEnumerator Node_TrySetException_And_Status() => UniTask.ToCoroutine(async () =>
+        public IEnumerator Node_TrySetException_SetsFaultedStatus() => UniTask.ToCoroutine(async () =>
         {
             var node = UniTaskNode<bool>.Create();
             var task = node.WaitAsync(Timeout.Infinite);
 
-            Assert.AreEqual(UniTaskStatus.Pending, node.UnsafeGetStatus());
+            Assert.That(node.UnsafeGetStatus(), Is.EqualTo(UniTaskStatus.Pending));
 
             node.TrySetException(new InvalidOperationException());
 
             // awaitで消費される前にステータスを確認
-            Assert.AreEqual(UniTaskStatus.Faulted, node.UnsafeGetStatus());
+            Assert.That(node.UnsafeGetStatus(), Is.EqualTo(UniTaskStatus.Faulted));
 
             try
             {
@@ -118,7 +118,7 @@ namespace UniTaskPlus.Tests.Runtime
         });
 
         [UnityTest]
-        public IEnumerator Node_Timeout_Coverage() => UniTask.ToCoroutine(async () =>
+        public IEnumerator Node_Timeout_ThrowsOperationCanceledException() => UniTask.ToCoroutine(async () =>
         {
             var node = UniTaskNode<bool>.Create();
             var task = node.WaitAsync(10);
@@ -127,7 +127,7 @@ namespace UniTaskPlus.Tests.Runtime
             await UniTask.Delay(50);
 
             // awaitで消費される前にステータスを確認
-            Assert.AreEqual(UniTaskStatus.Canceled, node.UnsafeGetStatus());
+            Assert.That(node.UnsafeGetStatus(), Is.EqualTo(UniTaskStatus.Canceled));
 
             try
             {
@@ -141,7 +141,7 @@ namespace UniTaskPlus.Tests.Runtime
         });
 
         [UnityTest]
-        public IEnumerator Node_ExternalCancellation_Coverage() => UniTask.ToCoroutine(async () =>
+        public IEnumerator Node_ExternalCancellation_ThrowsOperationCanceledException() => UniTask.ToCoroutine(async () =>
         {
             var cts = new CancellationTokenSource();
             var node = UniTaskNode<bool>.Create();
@@ -161,7 +161,7 @@ namespace UniTaskPlus.Tests.Runtime
         });
 
         [UnityTest]
-        public IEnumerator Node_Pooling_And_Properties() => UniTask.ToCoroutine(async () =>
+        public IEnumerator Node_TrySetResult_ReturnsExpectedValue() => UniTask.ToCoroutine(async () =>
         {
             var node1 = UniTaskNode<int>.Create();
             node1.Next = null;
@@ -171,14 +171,14 @@ namespace UniTaskPlus.Tests.Runtime
             node1.TrySetResult(42);
 
             var result = await task1;
-            Assert.AreEqual(42, result);
+            Assert.That(result, Is.EqualTo(42));
 
             var node2 = UniTaskNode<int>.Create();
             var task2 = node2.WaitAsync(Timeout.Infinite);
             node2.TrySetResult(99);
 
             var result2 = await task2;
-            Assert.AreEqual(99, result2);
+            Assert.That(result2, Is.EqualTo(99));
 
             // IUniTaskSource の非ジェネリック GetResult メソッドのカバー
             var node3 = UniTaskNode<int>.Create();
@@ -209,7 +209,7 @@ namespace UniTaskPlus.Tests.Runtime
             var bag = new UniTaskBag();
             bag.Add(UniTask.RunOnThreadPool(() => completed = true));
             await bag.DisposeAsync();
-            Assert.IsTrue(completed);
+            Assert.That(completed, Is.True);
         });
 
         [UnityTest]
@@ -220,7 +220,7 @@ namespace UniTaskPlus.Tests.Runtime
             bag.Add(UniTask.RunOnThreadPool(() => Interlocked.Increment(ref count)));
             bag.Add(UniTask.RunOnThreadPool(() => Interlocked.Increment(ref count)));
             await bag.DisposeAsync();
-            Assert.AreEqual(2, count);
+            Assert.That(count, Is.EqualTo(2));
         });
 
         [UnityTest]
@@ -233,7 +233,7 @@ namespace UniTaskPlus.Tests.Runtime
                 bag.Add(UniTask.RunOnThreadPool(() => Interlocked.Increment(ref count)));
             }
             await bag.DisposeAsync();
-            Assert.AreEqual(5, count);
+            Assert.That(count, Is.EqualTo(5));
         });
 
         [UnityTest]
@@ -246,7 +246,7 @@ namespace UniTaskPlus.Tests.Runtime
                 bag.Add(UniTask.RunOnThreadPool(() => Interlocked.Increment(ref count)));
             }
             await bag.DisposeAsync();
-            Assert.AreEqual(20, count);
+            Assert.That(count, Is.EqualTo(20));
         });
 
         [UnityTest]
@@ -257,7 +257,7 @@ namespace UniTaskPlus.Tests.Runtime
             {
                 bag.Add(UniTask.RunOnThreadPool(() => completed = true));
             }
-            Assert.IsTrue(completed);
+            Assert.That(completed, Is.True);
         });
 
         [UnityTest]
@@ -283,7 +283,7 @@ namespace UniTaskPlus.Tests.Runtime
                 }));
             }
             await bag.DisposeAsync();
-            Assert.AreEqual(3, count);
+            Assert.That(count, Is.EqualTo(3));
         });
 
         [UnityTest]
@@ -308,7 +308,7 @@ namespace UniTaskPlus.Tests.Runtime
                     bag.Add(UniTask.RunOnThreadPool(() => Interlocked.Increment(ref count)));
                 }
             }
-            Assert.AreEqual(10, count);
+            Assert.That(count, Is.EqualTo(10));
         });
 
         [UnityTest]
@@ -325,7 +325,7 @@ namespace UniTaskPlus.Tests.Runtime
             var bag = new UniTaskBag();
             bag.Add(UniTask.RunOnThreadPool(() => completed = true));
             await bag.DisposeAsync();
-            Assert.IsTrue(completed);
+            Assert.That(completed, Is.True);
         });
     }
 
@@ -339,56 +339,56 @@ namespace UniTaskPlus.Tests.Runtime
         public void Constructor_ValidParameters_SetCurrentCount()
         {
             var sem = new UniTaskSemaphore(3, 5);
-            Assert.AreEqual(3u, sem.CurrentCount);
+            Assert.That(sem.CurrentCount, Is.EqualTo(3u));
         }
 
         [Test]
         public void Constructor_DefaultMaxCount_SetCurrentCount()
         {
             var sem = new UniTaskSemaphore(1);
-            Assert.AreEqual(1u, sem.CurrentCount);
+            Assert.That(sem.CurrentCount, Is.EqualTo(1u));
         }
 
         [Test]
         public void Constructor_InitialCountGreaterThanMaxCount_Throws()
         {
-            Assert.Throws<ArgumentOutOfRangeException>(() => new UniTaskSemaphore(5, 3));
+            Assert.That(() => new UniTaskSemaphore(5, 3), Throws.TypeOf<ArgumentOutOfRangeException>());
         }
 
         [Test]
         public void Constructor_MaxCountZero_Throws()
         {
-            Assert.Throws<ArgumentOutOfRangeException>(() => new UniTaskSemaphore(0, 0));
+            Assert.That(() => new UniTaskSemaphore(0, 0), Throws.TypeOf<ArgumentOutOfRangeException>());
         }
 
         [Test]
         public void Constructor_ZeroInitialCount_Valid()
         {
             var sem = new UniTaskSemaphore(0, 5);
-            Assert.AreEqual(0u, sem.CurrentCount);
+            Assert.That(sem.CurrentCount, Is.EqualTo(0u));
         }
 
         [Test]
         public void Constructor_InitialEqualsMaxCount_Valid()
         {
             var sem = new UniTaskSemaphore(10, 10);
-            Assert.AreEqual(10u, sem.CurrentCount);
+            Assert.That(sem.CurrentCount, Is.EqualTo(10u));
         }
 
         [Test]
         public void Constructor_DefaultMaxCount_AllowsRelease()
         {
             var sem = new UniTaskSemaphore(0);
-            Assert.AreEqual(0u, sem.CurrentCount);
+            Assert.That(sem.CurrentCount, Is.EqualTo(0u));
             sem.Release();
-            Assert.AreEqual(1u, sem.CurrentCount);
+            Assert.That(sem.CurrentCount, Is.EqualTo(1u));
         }
 
         [Test]
         public void Constructor_LargeMaxCount_Valid()
         {
             var sem = new UniTaskSemaphore(100, 1000);
-            Assert.AreEqual(100u, sem.CurrentCount);
+            Assert.That(sem.CurrentCount, Is.EqualTo(100u));
         }
     }
 
@@ -403,8 +403,8 @@ namespace UniTaskPlus.Tests.Runtime
         {
             var sem = new UniTaskSemaphore(2, 2);
             var result = await sem.WaitAsync(Timeout.Infinite);
-            Assert.IsTrue(result);
-            Assert.AreEqual(1u, sem.CurrentCount);
+            Assert.That(result, Is.True);
+            Assert.That(sem.CurrentCount, Is.EqualTo(1u));
         });
 
         [UnityTest]
@@ -412,7 +412,7 @@ namespace UniTaskPlus.Tests.Runtime
         {
             var sem = new UniTaskSemaphore(0, 1);
             var result = await sem.WaitAsync(0);
-            Assert.IsFalse(result);
+            Assert.That(result, Is.False);
         });
 
         [UnityTest]
@@ -435,7 +435,7 @@ namespace UniTaskPlus.Tests.Runtime
         public void WaitAsync_NegativeTimeout_Throws()
         {
             var sem = new UniTaskSemaphore(1, 1);
-            Assert.Throws<ArgumentOutOfRangeException>(() => sem.WaitAsync(-2).Forget());
+            Assert.That(() => sem.WaitAsync(-2).Forget(), Throws.TypeOf<ArgumentOutOfRangeException>());
         }
 
         [UnityTest]
@@ -460,23 +460,25 @@ namespace UniTaskPlus.Tests.Runtime
         {
             var sem = new UniTaskSemaphore(1, 1);
             var result = await sem.WaitAsync(TimeSpan.FromMilliseconds(1000));
-            Assert.IsTrue(result);
+            Assert.That(result, Is.True);
         });
 
         [Test]
         public void WaitAsync_WithTimeSpan_InvalidRange_Throws()
         {
             var sem = new UniTaskSemaphore(1, 1);
-            Assert.Throws<ArgumentOutOfRangeException>(() =>
-                sem.WaitAsync(TimeSpan.FromMilliseconds(-2)).Forget());
+            Assert.That(
+                () => sem.WaitAsync(TimeSpan.FromMilliseconds(-2)).Forget(),
+                Throws.TypeOf<ArgumentOutOfRangeException>());
         }
 
         [Test]
         public void WaitAsync_WithTimeSpan_TooLarge_Throws()
         {
             var sem = new UniTaskSemaphore(1, 1);
-            Assert.Throws<ArgumentOutOfRangeException>(() =>
-                sem.WaitAsync(TimeSpan.FromMilliseconds((double)int.MaxValue + 1)).Forget());
+            Assert.That(
+                () => sem.WaitAsync(TimeSpan.FromMilliseconds((double)int.MaxValue + 1)).Forget(),
+                Throws.TypeOf<ArgumentOutOfRangeException>());
         }
 
         [UnityTest]
@@ -487,7 +489,7 @@ namespace UniTaskPlus.Tests.Runtime
             await UniTask.Delay(50);
             sem.Release();
             await waitTask;
-            Assert.AreEqual(0u, sem.CurrentCount);
+            Assert.That(sem.CurrentCount, Is.EqualTo(0u));
         });
 
         [UnityTest]
@@ -499,7 +501,7 @@ namespace UniTaskPlus.Tests.Runtime
             await UniTask.Delay(50);
             sem.Release();
             var result = await waitTask;
-            Assert.IsTrue(result);
+            Assert.That(result, Is.True);
         });
 
         [UnityTest]
@@ -510,7 +512,7 @@ namespace UniTaskPlus.Tests.Runtime
             await UniTask.Delay(50);
             sem.Release();
             var result = await waitTask;
-            Assert.IsTrue(result);
+            Assert.That(result, Is.True);
         });
 
         [UnityTest]
@@ -518,8 +520,8 @@ namespace UniTaskPlus.Tests.Runtime
         {
             var sem = new UniTaskSemaphore(0, 1);
             var result = await sem.WaitAsync(50);
-            Assert.IsFalse(result);
-            Assert.AreEqual(0u, sem.CurrentCount);
+            Assert.That(result, Is.False);
+            Assert.That(sem.CurrentCount, Is.EqualTo(0u));
         });
 
         [UnityTest]
@@ -546,7 +548,7 @@ namespace UniTaskPlus.Tests.Runtime
         {
             var sem = new UniTaskSemaphore(1, 1);
             await sem.WaitAsync();
-            Assert.AreEqual(0u, sem.CurrentCount);
+            Assert.That(sem.CurrentCount, Is.EqualTo(0u));
         });
 
         [UnityTest]
@@ -563,10 +565,10 @@ namespace UniTaskPlus.Tests.Runtime
 
             var waitTask = WaitTask();
             await UniTask.Delay(50);
-            Assert.IsFalse(waited);
+            Assert.That(waited, Is.False);
             sem.Release();
             await waitTask;
-            Assert.IsTrue(waited);
+            Assert.That(waited, Is.True);
         });
 
         [UnityTest]
@@ -578,7 +580,7 @@ namespace UniTaskPlus.Tests.Runtime
             await UniTask.Delay(50);
             sem.Release();
             var result = await waitTask;
-            Assert.IsTrue(result);
+            Assert.That(result, Is.True);
         });
 
         [UnityTest]
@@ -586,8 +588,8 @@ namespace UniTaskPlus.Tests.Runtime
         {
             var sem = new UniTaskSemaphore(1, 1);
             var result = await sem.WaitAsync(TimeSpan.FromMilliseconds(-1));
-            Assert.IsTrue(result);
-            Assert.AreEqual(0u, sem.CurrentCount);
+            Assert.That(result, Is.True);
+            Assert.That(sem.CurrentCount, Is.EqualTo(0u));
         });
 
         [UnityTest]
@@ -595,7 +597,7 @@ namespace UniTaskPlus.Tests.Runtime
         {
             var sem = new UniTaskSemaphore(1, 1);
             var result = await sem.WaitAsync(TimeSpan.Zero);
-            Assert.IsTrue(result);
+            Assert.That(result, Is.True);
         });
 
         [UnityTest]
@@ -603,7 +605,7 @@ namespace UniTaskPlus.Tests.Runtime
         {
             var sem = new UniTaskSemaphore(0, 1);
             var result = await sem.WaitAsync(TimeSpan.Zero);
-            Assert.IsFalse(result);
+            Assert.That(result, Is.False);
         });
 
         [UnityTest]
@@ -613,7 +615,7 @@ namespace UniTaskPlus.Tests.Runtime
             await sem.WaitAsync(Timeout.Infinite);
             await sem.WaitAsync(Timeout.Infinite);
             await sem.WaitAsync(Timeout.Infinite);
-            Assert.AreEqual(0u, sem.CurrentCount);
+            Assert.That(sem.CurrentCount, Is.EqualTo(0u));
         });
 
         [UnityTest]
@@ -639,8 +641,8 @@ namespace UniTaskPlus.Tests.Runtime
             var sem = new UniTaskSemaphore(2, 2);
             var cts = new CancellationTokenSource();
             var result = await sem.WaitAsync(Timeout.Infinite, cts.Token);
-            Assert.IsTrue(result);
-            Assert.AreEqual(1u, sem.CurrentCount);
+            Assert.That(result, Is.True);
+            Assert.That(sem.CurrentCount, Is.EqualTo(1u));
         });
 
         [UnityTest]
@@ -648,7 +650,7 @@ namespace UniTaskPlus.Tests.Runtime
         {
             var sem = new UniTaskSemaphore(0, 1);
             var result = await sem.WaitAsync(50);
-            Assert.IsFalse(result);
+            Assert.That(result, Is.False);
         });
     }
 
@@ -663,10 +665,10 @@ namespace UniTaskPlus.Tests.Runtime
         {
             var sem = new UniTaskSemaphore(1, 2);
             await sem.WaitAsync(Timeout.Infinite);
-            Assert.AreEqual(0u, sem.CurrentCount);
+            Assert.That(sem.CurrentCount, Is.EqualTo(0u));
             var prev = sem.Release();
-            Assert.AreEqual(0u, prev);
-            Assert.AreEqual(1u, sem.CurrentCount);
+            Assert.That(prev, Is.EqualTo(0u));
+            Assert.That(sem.CurrentCount, Is.EqualTo(1u));
         });
 
         [UnityTest]
@@ -676,17 +678,17 @@ namespace UniTaskPlus.Tests.Runtime
             await sem.WaitAsync(Timeout.Infinite);
             await sem.WaitAsync(Timeout.Infinite);
             await sem.WaitAsync(Timeout.Infinite);
-            Assert.AreEqual(0u, sem.CurrentCount);
+            Assert.That(sem.CurrentCount, Is.EqualTo(0u));
             var prev = sem.Release(3);
-            Assert.AreEqual(0u, prev);
-            Assert.AreEqual(3u, sem.CurrentCount);
+            Assert.That(prev, Is.EqualTo(0u));
+            Assert.That(sem.CurrentCount, Is.EqualTo(3u));
         });
 
         [Test]
         public void Release_WhenFull_ThrowsSemaphoreFullException()
         {
             var sem = new UniTaskSemaphore(2, 2);
-            Assert.Throws<SemaphoreFullException>(() => sem.Release());
+            Assert.That(() => sem.Release(), Throws.TypeOf<SemaphoreFullException>());
         }
 
         [Test]
@@ -694,14 +696,14 @@ namespace UniTaskPlus.Tests.Runtime
         {
             var sem = new UniTaskSemaphore(1, 2);
             sem.Dispose();
-            Assert.Throws<ObjectDisposedException>(() => sem.Release());
+            Assert.That(() => sem.Release(), Throws.TypeOf<ObjectDisposedException>());
         }
 
         [Test]
         public void Release_ZeroCount_Throws()
         {
             var sem = new UniTaskSemaphore(0, 2);
-            Assert.Throws<ArgumentOutOfRangeException>(() => sem.Release(0));
+            Assert.That(() => sem.Release(0), Throws.TypeOf<ArgumentOutOfRangeException>());
         }
 
         [UnityTest]
@@ -718,13 +720,13 @@ namespace UniTaskPlus.Tests.Runtime
             var task2 = Waiter2();
 
             await UniTask.Delay(50);
-            Assert.IsFalse(result1);
-            Assert.IsFalse(result2);
+            Assert.That(result1, Is.False);
+            Assert.That(result2, Is.False);
 
             sem.Release(2);
             await UniTask.WhenAll(task1, task2);
-            Assert.IsTrue(result1);
-            Assert.IsTrue(result2);
+            Assert.That(result1, Is.True);
+            Assert.That(result2, Is.True);
         });
 
         [UnityTest]
@@ -732,7 +734,7 @@ namespace UniTaskPlus.Tests.Runtime
         {
             var sem = new UniTaskSemaphore(1, 2);
             await sem.WaitAsync(Timeout.Infinite);
-            Assert.Throws<SemaphoreFullException>(() => sem.Release(3));
+            Assert.That(() => sem.Release(3), Throws.TypeOf<SemaphoreFullException>());
         });
 
         [UnityTest]
@@ -747,8 +749,8 @@ namespace UniTaskPlus.Tests.Runtime
             await UniTask.Delay(50);
             sem.Release(2);
             await waitTask;
-            Assert.IsTrue(waited);
-            Assert.AreEqual(1u, sem.CurrentCount);
+            Assert.That(waited, Is.True);
+            Assert.That(sem.CurrentCount, Is.EqualTo(1u));
         });
 
         [UnityTest]
@@ -766,8 +768,8 @@ namespace UniTaskPlus.Tests.Runtime
             await UniTask.Delay(50);
             sem.Release(2);
             await UniTask.WhenAll(task1, task2);
-            Assert.AreEqual(2, count);
-            Assert.AreEqual(0u, sem.CurrentCount);
+            Assert.That(count, Is.EqualTo(2));
+            Assert.That(sem.CurrentCount, Is.EqualTo(0u));
         });
 
         [UnityTest]
@@ -776,8 +778,8 @@ namespace UniTaskPlus.Tests.Runtime
             var sem = new UniTaskSemaphore(3, 5);
             await sem.WaitAsync(Timeout.Infinite);
             var prev = sem.Release();
-            Assert.AreEqual(2u, prev);
-            Assert.AreEqual(3u, sem.CurrentCount);
+            Assert.That(prev, Is.EqualTo(2u));
+            Assert.That(sem.CurrentCount, Is.EqualTo(3u));
         });
 
         [UnityTest]
@@ -792,7 +794,7 @@ namespace UniTaskPlus.Tests.Runtime
             await UniTask.Delay(50);
             sem.Release();
             await waitTask;
-            Assert.IsTrue(waited);
+            Assert.That(waited, Is.True);
         });
     }
 
@@ -807,7 +809,7 @@ namespace UniTaskPlus.Tests.Runtime
         {
             var sem = new UniTaskSemaphore(1, 1);
             sem.Dispose();
-            Assert.Throws<ObjectDisposedException>(() => sem.WaitAsync(0).Forget());
+            Assert.That(() => sem.WaitAsync(0).Forget(), Throws.TypeOf<ObjectDisposedException>());
         }
 
         [Test]
@@ -815,7 +817,7 @@ namespace UniTaskPlus.Tests.Runtime
         {
             var sem = new UniTaskSemaphore(1, 1);
             sem.Dispose(false);
-            Assert.DoesNotThrow(() => sem.WaitAsync(0).Forget());
+            Assert.That(() => sem.WaitAsync(0).Forget(), Throws.Nothing);
         }
 
         [Test]
@@ -823,7 +825,7 @@ namespace UniTaskPlus.Tests.Runtime
         {
             var sem = new UniTaskSemaphore(1, 1);
             sem.Dispose();
-            Assert.DoesNotThrow(() => sem.Dispose());
+            Assert.That(() => sem.Dispose(), Throws.Nothing);
         }
 
         [Test]
@@ -831,7 +833,7 @@ namespace UniTaskPlus.Tests.Runtime
         {
             var sem = new UniTaskSemaphore(1, 2);
             sem.Dispose();
-            Assert.Throws<ObjectDisposedException>(() => sem.Release());
+            Assert.That(() => sem.Release(), Throws.TypeOf<ObjectDisposedException>());
         }
 
         [Test]
@@ -839,7 +841,7 @@ namespace UniTaskPlus.Tests.Runtime
         {
             var sem = new UniTaskSemaphore(0, 1);
             sem.Dispose();
-            Assert.Throws<ObjectDisposedException>(() => sem.WaitAsync(0).Forget());
+            Assert.That(() => sem.WaitAsync(0).Forget(), Throws.TypeOf<ObjectDisposedException>());
         }
     }
 
@@ -853,28 +855,28 @@ namespace UniTaskPlus.Tests.Runtime
         public IEnumerator WaitScopeAsync_ReturnsHandle_ThatReleasesOnDispose() => UniTask.ToCoroutine(async () =>
         {
             var sem = new UniTaskSemaphore(1, 1);
-            Assert.AreEqual(1u, sem.CurrentCount);
+            Assert.That(sem.CurrentCount, Is.EqualTo(1u));
 
             using (await sem.WaitScopeAsync())
             {
-                Assert.AreEqual(0u, sem.CurrentCount);
+                Assert.That(sem.CurrentCount, Is.EqualTo(0u));
             }
 
-            Assert.AreEqual(1u, sem.CurrentCount);
+            Assert.That(sem.CurrentCount, Is.EqualTo(1u));
         });
 
         [UnityTest]
-        public IEnumerator WaitScopeAsync_WithCancellation() => UniTask.ToCoroutine(async () =>
+        public IEnumerator WaitScopeAsync_WithCancellableToken_ReleasesOnDispose() => UniTask.ToCoroutine(async () =>
         {
             var sem = new UniTaskSemaphore(1, 1);
             var cts = new CancellationTokenSource();
 
             using (await sem.WaitScopeAsync(cts.Token))
             {
-                Assert.AreEqual(0u, sem.CurrentCount);
+                Assert.That(sem.CurrentCount, Is.EqualTo(0u));
             }
 
-            Assert.AreEqual(1u, sem.CurrentCount);
+            Assert.That(sem.CurrentCount, Is.EqualTo(1u));
         });
 
         [UnityTest]
@@ -886,9 +888,9 @@ namespace UniTaskPlus.Tests.Runtime
             {
                 using (await sem.WaitScopeAsync())
                 {
-                    Assert.AreEqual(0u, sem.CurrentCount);
+                    Assert.That(sem.CurrentCount, Is.EqualTo(0u));
                 }
-                Assert.AreEqual(1u, sem.CurrentCount);
+                Assert.That(sem.CurrentCount, Is.EqualTo(1u));
             }
         });
 
@@ -900,14 +902,14 @@ namespace UniTaskPlus.Tests.Runtime
 
             using (await sem1.WaitScopeAsync())
             {
-                Assert.AreEqual(0u, sem1.CurrentCount);
+                Assert.That(sem1.CurrentCount, Is.EqualTo(0u));
                 using (await sem2.WaitScopeAsync())
                 {
-                    Assert.AreEqual(0u, sem2.CurrentCount);
+                    Assert.That(sem2.CurrentCount, Is.EqualTo(0u));
                 }
-                Assert.AreEqual(1u, sem2.CurrentCount);
+                Assert.That(sem2.CurrentCount, Is.EqualTo(1u));
             }
-            Assert.AreEqual(1u, sem1.CurrentCount);
+            Assert.That(sem1.CurrentCount, Is.EqualTo(1u));
         });
 
         [UnityTest]
@@ -915,10 +917,10 @@ namespace UniTaskPlus.Tests.Runtime
         {
             var sem = new UniTaskSemaphore(1, 2);
             var handle = await sem.WaitScopeAsync();
-            Assert.AreEqual(0u, sem.CurrentCount);
+            Assert.That(sem.CurrentCount, Is.EqualTo(0u));
 
             ((IDisposable)handle).Dispose();
-            Assert.AreEqual(1u, sem.CurrentCount);
+            Assert.That(sem.CurrentCount, Is.EqualTo(1u));
         });
     }
 
@@ -956,8 +958,8 @@ namespace UniTaskPlus.Tests.Runtime
             }
 
             await UniTask.WhenAll(tasks);
-            Assert.LessOrEqual(maxConcurrent, 2);
-            Assert.AreEqual(2u, sem.CurrentCount);
+            Assert.That(maxConcurrent, Is.LessThanOrEqualTo(2));
+            Assert.That(sem.CurrentCount, Is.EqualTo(2u));
         });
 
         [UnityTest]
@@ -997,8 +999,8 @@ namespace UniTaskPlus.Tests.Runtime
             }
 
             await UniTask.WhenAll(tasks);
-            Assert.LessOrEqual(maxConcurrent, 1);
-            Assert.AreEqual(1u, sem.CurrentCount);
+            Assert.That(maxConcurrent, Is.LessThanOrEqualTo(1));
+            Assert.That(sem.CurrentCount, Is.EqualTo(1u));
         });
 
         [UnityTest]
@@ -1018,12 +1020,12 @@ namespace UniTaskPlus.Tests.Runtime
             var task3 = WaiterAsync();
 
             await UniTask.Delay(50);
-            Assert.AreEqual(0, count);
+            Assert.That(count, Is.EqualTo(0));
 
             sem.Release(3);
             await UniTask.WhenAll(task1, task2, task3);
-            Assert.AreEqual(3, count);
-            Assert.AreEqual(0u, sem.CurrentCount);
+            Assert.That(count, Is.EqualTo(3));
+            Assert.That(sem.CurrentCount, Is.EqualTo(0u));
         });
 
         [UnityTest]
@@ -1046,8 +1048,8 @@ namespace UniTaskPlus.Tests.Runtime
 
             sem.Release();
             await UniTask.WhenAll(task1, task2);
-            Assert.IsTrue(waited1);
-            Assert.IsTrue(waited2);
+            Assert.That(waited1, Is.True);
+            Assert.That(waited2, Is.True);
         });
 
         [UnityTest]
@@ -1055,7 +1057,7 @@ namespace UniTaskPlus.Tests.Runtime
         {
             var sem = new UniTaskSemaphore(0, 5);
             sem.Release(3);
-            Assert.AreEqual(3u, sem.CurrentCount);
+            Assert.That(sem.CurrentCount, Is.EqualTo(3u));
         });
 
         [UnityTest]
@@ -1081,8 +1083,8 @@ namespace UniTaskPlus.Tests.Runtime
                 }
             }
 
-            Assert.AreEqual(4, count);
-            Assert.AreEqual(2u, sem.CurrentCount);
+            Assert.That(count, Is.EqualTo(4));
+            Assert.That(sem.CurrentCount, Is.EqualTo(2u));
         });
 
         [UnityTest]
@@ -1094,7 +1096,7 @@ namespace UniTaskPlus.Tests.Runtime
                 await sem.WaitAsync();
                 sem.Release();
             }
-            Assert.AreEqual(1u, sem.CurrentCount);
+            Assert.That(sem.CurrentCount, Is.EqualTo(1u));
         });
 
         [UnityTest]
@@ -1102,8 +1104,8 @@ namespace UniTaskPlus.Tests.Runtime
         {
             var sem = new UniTaskSemaphore(0, 1);
             var result = await sem.WaitAsync(50);
-            Assert.IsFalse(result);
-            Assert.AreEqual(0u, sem.CurrentCount);
+            Assert.That(result, Is.False);
+            Assert.That(sem.CurrentCount, Is.EqualTo(0u));
         });
     }
 
