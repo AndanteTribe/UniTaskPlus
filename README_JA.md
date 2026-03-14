@@ -1,5 +1,5 @@
 # UniTaskPlus
-[![unity-meta-check](https://github.com/AndanteTribe/UniTaskPlus/actions/workflows/unity-meta-check.yml/badge.svg)](https://github.com/AndanteTribe/UniTaskPlus/actions/workflows/unity-meta-check.yml)
+[![unity-test](https://github.com/AndanteTribe/UniTaskPlus/actions/workflows/unity-test.yml/badge.svg)](https://github.com/AndanteTribe/UniTaskPlus/actions/workflows/unity-test.yml)
 [![Releases](https://img.shields.io/github/release/AndanteTribe/UniTaskPlus.svg)](https://github.com/AndanteTribe/UniTaskPlus/releases)
 [![GitHub license](https://img.shields.io/github/license/AndanteTribe/UniTaskPlus.svg)](./LICENSE)
 [![openupm](https://img.shields.io/npm/v/jp.andantetribe.unitaskplus?label=openupm&registry_uri=https://package.openupm.com)](https://openupm.com/packages/jp.andantetribe.unitaskplus/)
