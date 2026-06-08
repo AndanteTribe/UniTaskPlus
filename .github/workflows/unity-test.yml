@@ -32,7 +32,7 @@ jobs:
           chmod +x free_disk_space.sh
           ./free_disk_space.sh
           rm -f free_disk_space.sh
-        # ghasec-ignore: unpinned-action
+      # ghasec-ignore: unpinned-action
       - uses: AndanteTribe/Actions/actions/unity-test-runner@main # zizmor: ignore[unpinned-uses] repository-local action reference is intentionally tracked on @main
         id: tests
         env:
@@ -45,14 +45,14 @@ jobs:
           unityVersion: auto
           testMode: playMode
           coverageOptions: 'generateHtmlReport;generateAdditionalReports;assemblyFilters:+UniTaskPlus'
-        # ghasec-ignore: unpinned-action
+      # ghasec-ignore: unpinned-action
       - uses: AndanteTribe/Actions/actions/upload-artifact@main # zizmor: ignore[unpinned-uses] repository-local action reference is intentionally tracked on @main
         if: always()
         with:
           name: Test results
           path: ${{ steps.tests.outputs.artifactsPath }}
           retention-days: 2
-        # ghasec-ignore: unpinned-action
+      # ghasec-ignore: unpinned-action
       - uses: AndanteTribe/Actions/actions/upload-artifact@main # zizmor: ignore[unpinned-uses] repository-local action reference is intentionally tracked on @main
         if: always()
         with:
