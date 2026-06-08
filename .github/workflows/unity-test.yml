@@ -18,7 +18,8 @@ jobs:
       checks: write
     if: ${{ github.event_name == 'pull_request' && github.event.label.name == 'request-ci' || github.event_name == 'push' || github.event_name == 'workflow_dispatch' }}
     steps:
-      - uses: actions/checkout@v4
+      # ghasec-ignore: unpinned-action
+      - uses: AndanteTribe/Actions/actions/checkout@main # zizmor: ignore[unpinned-uses] repository-local action reference is intentionally tracked on @main
         with:
           ref: ${{ github.event.pull_request.head.sha || github.sha }}
       - name: Unity Cache
@@ -31,7 +32,8 @@ jobs:
           chmod +x free_disk_space.sh
           ./free_disk_space.sh
           rm -f free_disk_space.sh
-      - uses: game-ci/unity-test-runner@v4
+        # ghasec-ignore: unpinned-action
+      - uses: AndanteTribe/Actions/actions/unity-test-runner@main # zizmor: ignore[unpinned-uses] repository-local action reference is intentionally tracked on @main
         id: tests
         env:
           UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
@@ -43,13 +45,15 @@ jobs:
           unityVersion: auto
           testMode: playMode
           coverageOptions: 'generateHtmlReport;generateAdditionalReports;assemblyFilters:+UniTaskPlus'
-      - uses: actions/upload-artifact@v4
+        # ghasec-ignore: unpinned-action
+      - uses: AndanteTribe/Actions/actions/upload-artifact@main # zizmor: ignore[unpinned-uses] repository-local action reference is intentionally tracked on @main
         if: always()
         with:
           name: Test results
           path: ${{ steps.tests.outputs.artifactsPath }}
           retention-days: 2
-      - uses: actions/upload-artifact@v4
+        # ghasec-ignore: unpinned-action
+      - uses: AndanteTribe/Actions/actions/upload-artifact@main # zizmor: ignore[unpinned-uses] repository-local action reference is intentionally tracked on @main
         if: always()
         with:
           name: Coverage Results
