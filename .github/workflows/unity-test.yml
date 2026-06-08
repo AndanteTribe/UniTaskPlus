@@ -23,7 +23,8 @@ jobs:
         with:
           ref: ${{ github.event.pull_request.head.sha || github.sha }}
       - name: Unity Cache
-        uses: AndanteTribe/Actions/actions/unity-cache@main
+        # ghasec-ignore: unpinned-action
+        uses: AndanteTribe/Actions/actions/unity-cache@main # zizmor: ignore[unpinned-uses] repository-local action reference is intentionally tracked on @main
         with:
           unity-project-path: src/UniTaskPlus.Unity
       - name: Free disk space
