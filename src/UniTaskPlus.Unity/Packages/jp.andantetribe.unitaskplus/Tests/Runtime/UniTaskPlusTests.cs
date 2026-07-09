@@ -548,8 +548,8 @@ namespace UniTaskPlus.Tests.Runtime
         public IEnumerator RemoveMiddleWaiterKeepsQueueLinked() => UniTask.ToCoroutine(async () =>
         {
             var sem = new UniTaskSemaphore(0, 2);
-            var createAndAddAsyncWaiter = typeof(UniTaskSemaphore).GetMethod("CreateAndAddAsyncWaiter", BindingFlags.Instance | BindingFlags.NonPublic)!;
-            var removeAsyncWaiter = typeof(UniTaskSemaphore).GetMethod("RemoveAsyncWaiter", BindingFlags.Instance | BindingFlags.NonPublic)!;
+            var createAndAddAsyncWaiter = GetPrivateMethod("CreateAndAddAsyncWaiter");
+            var removeAsyncWaiter = GetPrivateMethod("RemoveAsyncWaiter");
 
             var first = (UniTaskNode<bool>)createAndAddAsyncWaiter.Invoke(sem, null)!;
             var middle = (UniTaskNode<bool>)createAndAddAsyncWaiter.Invoke(sem, null)!;
@@ -580,12 +580,12 @@ namespace UniTaskPlus.Tests.Runtime
         });
 
         [UnityTest]
-        public IEnumerator RemovedPendingWaiterRethrowsTimeoutCancellation() => UniTask.ToCoroutine(async () =>
+        public IEnumerator RemovedPendingWaiterRethrowsDirectCancellation() => UniTask.ToCoroutine(async () =>
         {
             var sem = new UniTaskSemaphore(0, 1);
-            var createAndAddAsyncWaiter = typeof(UniTaskSemaphore).GetMethod("CreateAndAddAsyncWaiter", BindingFlags.Instance | BindingFlags.NonPublic)!;
-            var removeAsyncWaiter = typeof(UniTaskSemaphore).GetMethod("RemoveAsyncWaiter", BindingFlags.Instance | BindingFlags.NonPublic)!;
-            var waitUntilCountOrTimeoutAsync = typeof(UniTaskSemaphore).GetMethod("WaitUntilCountOrTimeoutAsync", BindingFlags.Instance | BindingFlags.NonPublic)!;
+            var createAndAddAsyncWaiter = GetPrivateMethod("CreateAndAddAsyncWaiter");
+            var removeAsyncWaiter = GetPrivateMethod("RemoveAsyncWaiter");
+            var waitUntilCountOrTimeoutAsync = GetPrivateMethod("WaitUntilCountOrTimeoutAsync");
 
             var waiter = (UniTaskNode<bool>)createAndAddAsyncWaiter.Invoke(sem, null)!;
             var waitTask = (UniTask<bool>)waitUntilCountOrTimeoutAsync.Invoke(sem, new object[] { waiter, 50, CancellationToken.None })!;
@@ -597,13 +597,19 @@ namespace UniTaskPlus.Tests.Runtime
             try
             {
                 await waitTask;
-                Assert.Fail("Removed waiter timeout cancellation should have been rethrown.");
+                Assert.Fail("Removed waiter direct cancellation should have been rethrown.");
             }
             catch (OperationCanceledException)
             {
                 // expected
             }
         });
+
+        private static MethodInfo GetPrivateMethod(string name)
+        {
+            return typeof(UniTaskSemaphore).GetMethod(name, BindingFlags.Instance | BindingFlags.NonPublic)
+                ?? throw new MissingMethodException(nameof(UniTaskSemaphore), name);
+        }
 
         [UnityTest]
         public IEnumerator WaitAsyncDefaultNoParameters() => UniTask.ToCoroutine(async () =>
