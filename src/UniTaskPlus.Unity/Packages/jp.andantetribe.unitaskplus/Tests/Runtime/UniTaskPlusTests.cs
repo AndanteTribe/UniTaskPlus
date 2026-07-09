@@ -3,6 +3,7 @@
 using System;
 using System.Buffers;
 using System.Collections;
+using System.Reflection;
 using System.Threading;
 using Cysharp.Threading.Tasks;
 using NUnit.Framework;
@@ -544,6 +545,67 @@ namespace UniTaskPlus.Tests.Runtime
         });
 
         [UnityTest]
+        public IEnumerator RemoveMiddleWaiterKeepsQueueLinked() => UniTask.ToCoroutine(async () =>
+        {
+            var sem = new UniTaskSemaphore(0, 2);
+            var createAndAddAsyncWaiter = typeof(UniTaskSemaphore).GetMethod("CreateAndAddAsyncWaiter", BindingFlags.Instance | BindingFlags.NonPublic)!;
+            var removeAsyncWaiter = typeof(UniTaskSemaphore).GetMethod("RemoveAsyncWaiter", BindingFlags.Instance | BindingFlags.NonPublic)!;
+
+            var first = (UniTaskNode<bool>)createAndAddAsyncWaiter.Invoke(sem, null)!;
+            var middle = (UniTaskNode<bool>)createAndAddAsyncWaiter.Invoke(sem, null)!;
+            var last = (UniTaskNode<bool>)createAndAddAsyncWaiter.Invoke(sem, null)!;
+            var firstWait = first.WaitAsync(Timeout.Infinite);
+            var middleWait = middle.WaitAsync(Timeout.Infinite);
+            var lastWait = last.WaitAsync(Timeout.Infinite);
+
+            var wasRemoved = (bool)removeAsyncWaiter.Invoke(sem, new object[] { middle })!;
+            Assert.That(wasRemoved, Is.True);
+
+            sem.Release(2);
+            middle.TrySetCanceled();
+
+            Assert.That(await firstWait, Is.True);
+            Assert.That(await lastWait, Is.True);
+            Assert.That(sem.CurrentCount, Is.EqualTo(0u));
+
+            try
+            {
+                await middleWait;
+                Assert.Fail("Removed waiter should have been canceled.");
+            }
+            catch (OperationCanceledException)
+            {
+                // expected
+            }
+        });
+
+        [UnityTest]
+        public IEnumerator RemovedPendingWaiterRethrowsTimeoutCancellation() => UniTask.ToCoroutine(async () =>
+        {
+            var sem = new UniTaskSemaphore(0, 1);
+            var createAndAddAsyncWaiter = typeof(UniTaskSemaphore).GetMethod("CreateAndAddAsyncWaiter", BindingFlags.Instance | BindingFlags.NonPublic)!;
+            var removeAsyncWaiter = typeof(UniTaskSemaphore).GetMethod("RemoveAsyncWaiter", BindingFlags.Instance | BindingFlags.NonPublic)!;
+            var waitUntilCountOrTimeoutAsync = typeof(UniTaskSemaphore).GetMethod("WaitUntilCountOrTimeoutAsync", BindingFlags.Instance | BindingFlags.NonPublic)!;
+
+            var waiter = (UniTaskNode<bool>)createAndAddAsyncWaiter.Invoke(sem, null)!;
+            var waitTask = (UniTask<bool>)waitUntilCountOrTimeoutAsync.Invoke(sem, new object[] { waiter, 50, CancellationToken.None })!;
+            var wasRemoved = (bool)removeAsyncWaiter.Invoke(sem, new object[] { waiter })!;
+
+            Assert.That(wasRemoved, Is.True);
+            waiter.TrySetCanceled();
+
+            try
+            {
+                await waitTask;
+                Assert.Fail("Removed waiter timeout cancellation should have been rethrown.");
+            }
+            catch (OperationCanceledException)
+            {
+                // expected
+            }
+        });
+
+        [UnityTest]
         public IEnumerator WaitAsyncDefaultNoParameters() => UniTask.ToCoroutine(async () =>
         {
             var sem = new UniTaskSemaphore(1, 1);
@@ -1052,13 +1114,13 @@ namespace UniTaskPlus.Tests.Runtime
             Assert.That(waited2, Is.True);
         });
 
-        [UnityTest]
-        public IEnumerator SemaphoreReleaseWithNoWaitersIncreasesCount() => UniTask.ToCoroutine(async () =>
+        [Test]
+        public void SemaphoreReleaseWithNoWaitersIncreasesCount()
         {
             var sem = new UniTaskSemaphore(0, 5);
             sem.Release(3);
             Assert.That(sem.CurrentCount, Is.EqualTo(3u));
-        });
+        }
 
         [UnityTest]
         public IEnumerator UniTaskBagWithSemaphoreCombinedUsage() => UniTask.ToCoroutine(async () =>
