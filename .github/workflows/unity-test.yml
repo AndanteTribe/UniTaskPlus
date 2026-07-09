@@ -44,7 +44,8 @@ jobs:
           projectPath: src/UniTaskPlus.Unity
           githubToken: ${{ secrets.GITHUB_TOKEN }}
           unityVersion: auto
-          testMode: playMode
+          testMode: All
+          customParameters: '-assemblyNames "UniTaskPlus.Runtime.Tests;UniTaskPlus.Editor.Tests"'
           coverageOptions: 'generateHtmlReport;generateAdditionalReports;assemblyFilters:+UniTaskPlus'
       # ghasec-ignore: unpinned-action
       - uses: AndanteTribe/Actions/actions/upload-artifact@main # zizmor: ignore[unpinned-uses] repository-local action reference is intentionally tracked on @main

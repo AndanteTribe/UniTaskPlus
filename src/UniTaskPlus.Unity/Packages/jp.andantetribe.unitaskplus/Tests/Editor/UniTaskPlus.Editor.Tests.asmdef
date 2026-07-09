@@ -1,0 +1,22 @@
+{
+    "name": "UniTaskPlus.Editor.Tests",
+    "rootNamespace": "UniTaskPlus",
+    "references": [
+        "GUID:5e7cbbcb25d06ff4180de82516e6dac0"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": true,
+    "precompiledReferences": [
+        "nunit.framework.dll"
+    ],
+    "autoReferenced": false,
+    "defineConstraints": [
+        "UNITY_INCLUDE_TESTS"
+    ],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

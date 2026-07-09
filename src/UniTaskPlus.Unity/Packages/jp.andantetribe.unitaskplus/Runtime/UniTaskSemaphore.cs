@@ -1,4 +1,4 @@
-﻿#nullable enable
+#nullable enable
 
 using System;
 using System.Diagnostics;
@@ -273,7 +273,7 @@ namespace UniTaskPlus
                 throw new ObjectDisposedException(nameof(UniTaskSemaphore));
             }
 
-ForceRelease:
+        ForceRelease:
             if (releaseCount < 1)
             {
                 throw new ArgumentOutOfRangeException(nameof(releaseCount), releaseCount, "The releaseCount argument must be greater than zero.");

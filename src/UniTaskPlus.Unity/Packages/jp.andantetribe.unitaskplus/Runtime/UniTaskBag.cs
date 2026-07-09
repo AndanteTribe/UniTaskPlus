@@ -1,6 +1,5 @@
-﻿#nullable enable
+#nullable enable
 
-using System;
 using System.Buffers;
 using Cysharp.Threading.Tasks;
 using UniTaskPlus.Internal;
