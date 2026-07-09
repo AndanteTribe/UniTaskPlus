@@ -775,8 +775,10 @@ namespace UniTaskPlus.Tests.Runtime
             var result1 = false;
             var result2 = false;
 
-            async UniTask Waiter1() { await sem.WaitAsync(); result1 = true; }
-            async UniTask Waiter2() { await sem.WaitAsync(); result2 = true; }
+            async UniTask Waiter1()
+            { await sem.WaitAsync(); result1 = true; }
+            async UniTask Waiter2()
+            { await sem.WaitAsync(); result2 = true; }
 
             var task1 = Waiter1();
             var task2 = Waiter2();
@@ -805,7 +807,8 @@ namespace UniTaskPlus.Tests.Runtime
             var sem = new UniTaskSemaphore(0, 5);
             var waited = false;
 
-            async UniTask WaiterTask() { await sem.WaitAsync(); waited = true; }
+            async UniTask WaiterTask()
+            { await sem.WaitAsync(); waited = true; }
             var waitTask = WaiterTask();
 
             await UniTask.Delay(50);
@@ -821,8 +824,10 @@ namespace UniTaskPlus.Tests.Runtime
             var sem = new UniTaskSemaphore(0, 5);
             var count = 0;
 
-            async UniTask Task1() { await sem.WaitAsync(); count++; }
-            async UniTask Task2() { await sem.WaitAsync(); count++; }
+            async UniTask Task1()
+            { await sem.WaitAsync(); count++; }
+            async UniTask Task2()
+            { await sem.WaitAsync(); count++; }
 
             var task1 = Task1();
             var task2 = Task2();
@@ -850,7 +855,8 @@ namespace UniTaskPlus.Tests.Runtime
             var sem = new UniTaskSemaphore(0, 1);
             var waited = false;
 
-            async UniTask WaiterTask() { await sem.WaitAsync(); waited = true; }
+            async UniTask WaiterTask()
+            { await sem.WaitAsync(); waited = true; }
             var waitTask = WaiterTask();
 
             await UniTask.Delay(50);
@@ -1097,8 +1103,10 @@ namespace UniTaskPlus.Tests.Runtime
             var waited1 = false;
             var waited2 = false;
 
-            async UniTask Task1() { await sem.WaitAsync(); waited1 = true; }
-            async UniTask Task2() { await sem.WaitAsync(); waited2 = true; }
+            async UniTask Task1()
+            { await sem.WaitAsync(); waited1 = true; }
+            async UniTask Task2()
+            { await sem.WaitAsync(); waited2 = true; }
 
             var task1 = Task1();
             var task2 = Task2();
