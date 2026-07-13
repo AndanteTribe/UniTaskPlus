@@ -1,6 +1,12 @@
 ---
-name: unitaskplus
+name: unitask-plus
 description: Use for Unity/C# UniTask code when collecting multiple UniTask values with List<UniTask> or arrays and awaiting them with UniTask.WhenAll, implementing async mutual exclusion/concurrency limits, or when UniTaskPlus, UniTaskBag, or UniTaskSemaphore is named.
+license: MIT
+metadata:
+  author: AndanteTribe
+  version: "1.1.0"
+required_packages:
+  com.cysharp.unitask: ">=2.5.10"
 ---
 
 # UniTaskPlus
