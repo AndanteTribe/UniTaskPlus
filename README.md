@@ -25,6 +25,47 @@ Open `Window > Package Manager`, select `[+] > Add package from git URL`, and en
 https://github.com/AndanteTribe/UniTaskPlus.git?path=src/UniTaskPlus.Unity/Packages/jp.andantetribe.unitaskplus
 ```
 
+## AI Assistant Skill
+
+UniTaskPlus 1.1.0 and later distribute the `unitask-plus` Agent Skill to assist development with UniTaskPlus. The same Skill can be used through either Unity AI Assistant or the GitHub CLI `gh skill` command.
+
+### Use with Unity AI Assistant
+
+The following versions are required:
+
+- UniTaskPlus 1.1.0 or later
+- `com.unity.ai.assistant` 2.8.0-pre.1 or later
+
+When you install UniTaskPlus as a UPM package, the Skill is installed at the following location:
+
+```text
+Packages/jp.andantetribe.unitaskplus/AIAssistantSkills/unitask-plus/SKILL.md
+```
+
+Supported versions of Unity AI Assistant discover Skills from the `AIAssistantSkills` folder in installed packages. In the Unity Editor's Skills management page, find `unitask-plus` under `Package skills` and set it to `Allow`. If the Skill doesn't appear, rescan the Skill locations from the same page.
+
+For installation and the latest usage instructions, refer to the [latest `com.unity.ai.assistant` documentation](https://docs.unity3d.com/Packages/com.unity.ai.assistant@latest). Older documentation versions might not describe how to use Skills included in UPM packages.
+
+### Use with GitHub CLI
+
+GitHub CLI 2.90.0 and later can install the same Skill for AI agents supported by `gh skill`.
+
+To review the Skill before installation, run:
+
+```shell
+gh skill preview AndanteTribe/UniTaskPlus "src/UniTaskPlus.Unity/Packages/jp.andantetribe.unitaskplus/AIAssistantSkills/unitask-plus"
+```
+
+To install the Skill, run:
+
+```shell
+gh skill install AndanteTribe/UniTaskPlus "src/UniTaskPlus.Unity/Packages/jp.andantetribe.unitaskplus/AIAssistantSkills/unitask-plus"
+```
+
+For details about selecting a target AI agent and installation scope, refer to the official [`gh skill install` manual](https://cli.github.com/manual/gh_skill_install).
+
+> `gh skill` is currently a preview feature and its commands and behavior might change.
+
 ## Quick Start
 
 ### UniTaskSemaphore
