@@ -25,46 +25,7 @@
 https://github.com/AndanteTribe/UniTaskPlus.git?path=src/UniTaskPlus.Unity/Packages/jp.andantetribe.unitaskplus
 ```
 
-## AI Assistant Skill
-
-UniTaskPlus 1.1.0 以降では、UniTaskPlus を利用した開発を支援する Agent Skill `unitask-plus` を配布しています。同じ Skill を、Unity AI Assistant と GitHub CLI の `gh skill` の2つの方法で利用できます。
-
-### Unity AI Assistant で利用する
-
-以下のバージョンが必要です。
-
-- UniTaskPlus 1.1.0 以上
-- `com.unity.ai.assistant` 2.8.0-pre.1 以上
-
-UniTaskPlus を UPM パッケージとしてインストールすると、Skill は次の場所に配置されます。
-
-```text
-Packages/jp.andantetribe.unitaskplus/AIAssistantSkills/unitask-plus/SKILL.md
-```
-
-対応バージョンの Unity AI Assistant は、インストール済みパッケージの `AIAssistantSkills` フォルダーから Skill を検出します。Unity Editor の Skills 管理画面で `Package skills` に表示される `unitask-plus` を `Allow` に設定してください。Skill が表示されない場合は、同じ画面から再スキャンを実行してください。
-
-Unity AI Assistant の導入方法や最新の操作手順については、[`com.unity.ai.assistant` の最新ドキュメント](https://docs.unity3d.com/Packages/com.unity.ai.assistant@latest)を参照してください。古いバージョンのドキュメントには、UPM パッケージに含まれる Skill の利用方法が掲載されていない場合があります。
-
-### GitHub CLI で利用する
-
-GitHub CLI 2.90.0 以降では、`gh skill` が対応する AI エージェントに同じ Skill をインストールできます。
-
-インストール前に Skill の内容を確認するには、次のコマンドを実行します。
-
-```shell
-gh skill preview AndanteTribe/UniTaskPlus "src/UniTaskPlus.Unity/Packages/jp.andantetribe.unitaskplus/AIAssistantSkills/unitask-plus"
-```
-
-Skill をインストールするには、次のコマンドを実行します。
-
-```shell
-gh skill install AndanteTribe/UniTaskPlus "src/UniTaskPlus.Unity/Packages/jp.andantetribe.unitaskplus/AIAssistantSkills/unitask-plus"
-```
-
-インストール先の AI エージェントやスコープの指定方法については、[`gh skill install` の公式マニュアル](https://cli.github.com/manual/gh_skill_install)を参照してください。
-
-> `gh skill` は現在プレビュー機能であり、今後コマンドや動作が変更される可能性があります。
+AI Assistant Skill の導入方法については、[AI Assistant Skill](#ai-assistant-skill)を参照してください。
 
 ## クイックスタート
 
@@ -161,6 +122,47 @@ public class UniTaskBagExample : MonoBehaviour
 |--------|------|
 | `Add(UniTask task)` | バッグに `UniTask` を追加します。 |
 | `DisposeAsync()` | バッグに追加されたすべてのタスクを待機し、内部リソースを解放します。`await using` と組み合わせて使用してください。 |
+
+## AI Assistant Skill
+
+UniTaskPlus 1.1.0 以降では、UniTaskPlus を利用した開発を支援する Agent Skill `unitask-plus` を配布しています。同じ Skill を、Unity AI Assistant と GitHub CLI の `gh skill` の2つの方法で利用できます。
+
+### Unity AI Assistant で利用する
+
+以下のバージョンが必要です。
+
+- UniTaskPlus 1.1.0 以上
+- `com.unity.ai.assistant` 2.8.0-pre.1 以上
+
+UniTaskPlus を UPM パッケージとしてインストールすると、Skill は次の場所に配置されます。
+
+```text
+Packages/jp.andantetribe.unitaskplus/AIAssistantSkills/unitask-plus/SKILL.md
+```
+
+対応バージョンの Unity AI Assistant は、インストール済みパッケージの `AIAssistantSkills` フォルダーから Skill を検出します。Unity Editor の Skills 管理画面で `Package skills` に表示される `unitask-plus` を `Allow` に設定してください。Skill が表示されない場合は、同じ画面から再スキャンを実行してください。
+
+Unity AI Assistant の導入方法や最新の操作手順については、[`com.unity.ai.assistant` の最新ドキュメント](https://docs.unity3d.com/Packages/com.unity.ai.assistant@latest)を参照してください。古いバージョンのドキュメントには、UPM パッケージに含まれる Skill の利用方法が掲載されていない場合があります。
+
+### GitHub CLI で利用する
+
+GitHub CLI 2.90.0 以降では、`gh skill` が対応する AI エージェントに同じ Skill をインストールできます。
+
+インストール前に Skill の内容を確認するには、次のコマンドを実行します。
+
+```shell
+gh skill preview AndanteTribe/UniTaskPlus "src/UniTaskPlus.Unity/Packages/jp.andantetribe.unitaskplus/AIAssistantSkills/unitask-plus"
+```
+
+Skill をインストールするには、次のコマンドを実行します。
+
+```shell
+gh skill install AndanteTribe/UniTaskPlus "src/UniTaskPlus.Unity/Packages/jp.andantetribe.unitaskplus/AIAssistantSkills/unitask-plus"
+```
+
+インストール先の AI エージェントやスコープの指定方法については、[`gh skill install` の公式マニュアル](https://cli.github.com/manual/gh_skill_install)を参照してください。
+
+> `gh skill` は現在プレビュー機能であり、今後コマンドや動作が変更される可能性があります。
 
 ## ライセンス
 このライブラリは、MIT ライセンスで公開しています。
