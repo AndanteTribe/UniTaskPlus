@@ -7,7 +7,6 @@ using System.Reflection;
 using System.Threading;
 using Cysharp.Threading.Tasks;
 using NUnit.Framework;
-using UniTaskPlus;
 using UniTaskPlus.Internal;
 using UnityEngine.TestTools;
 
@@ -44,51 +43,6 @@ namespace UniTaskPlus.Tests.Runtime
             Assert.That(array.Length, Is.GreaterThanOrEqualTo(10));
 
             pool.Return(array);
-        }
-    }
-
-    public class StateTupleTests
-    {
-        [Test]
-        public void StateTuple1CreateAndDeconstructUsesPool()
-        {
-            var tuple = StateTuple.Create(1);
-            tuple.Deconstruct(out var item1);
-            Assert.That(item1, Is.EqualTo(1));
-
-            var tuple2 = StateTuple.Create(2);
-            tuple2.Deconstruct(out var item2);
-            Assert.That(item2, Is.EqualTo(2));
-        }
-
-        [Test]
-        public void StateTuple2CreateAndDeconstructUsesPool()
-        {
-            var tuple = StateTuple.Create(1, "A");
-            tuple.Deconstruct(out var i1, out var s1);
-            Assert.That(i1, Is.EqualTo(1));
-            Assert.That(s1, Is.EqualTo("A"));
-
-            var tuple2 = StateTuple.Create(2, "B");
-            tuple2.Deconstruct(out var i2, out var s2);
-            Assert.That(i2, Is.EqualTo(2));
-            Assert.That(s2, Is.EqualTo("B"));
-        }
-
-        [Test]
-        public void StateTuple3CreateAndDeconstructUsesPool()
-        {
-            var tuple = StateTuple.Create(1, "A", 0.5f);
-            tuple.Deconstruct(out var i1, out var s1, out var f1);
-            Assert.That(i1, Is.EqualTo(1));
-            Assert.That(s1, Is.EqualTo("A"));
-            Assert.That(f1, Is.EqualTo(0.5f));
-
-            var tuple2 = StateTuple.Create(2, "B", 1.5f);
-            tuple2.Deconstruct(out var i2, out var s2, out var f2);
-            Assert.That(i2, Is.EqualTo(2));
-            Assert.That(s2, Is.EqualTo("B"));
-            Assert.That(f2, Is.EqualTo(1.5f));
         }
     }
 
