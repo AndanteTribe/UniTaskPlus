@@ -2,7 +2,6 @@
 
 using System;
 using System.Diagnostics;
-using System.Runtime.CompilerServices;
 using System.Threading;
 using Cysharp.Threading.Tasks;
 using UniTaskPlus.Internal;
@@ -176,7 +175,6 @@ namespace UniTaskPlus
                 : WaitUntilCountOrTimeoutAsync(asyncWaiter, millisecondsTimeout, cancellationToken);
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private UniTaskNode<bool> CreateAndAddAsyncWaiter()
         {
             var node = UniTaskNode<bool>.Create();
@@ -198,7 +196,6 @@ namespace UniTaskPlus
             return node;
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private bool RemoveAsyncWaiter(UniTaskNode<bool> node)
         {
             Assert.IsFalse(node == null, "Expected non-null task");
@@ -228,7 +225,6 @@ namespace UniTaskPlus
             return wasInList;
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private async UniTask<bool> WaitUntilCountOrTimeoutAsync(UniTaskNode<bool> asyncWaiter, int millisecondsTimeout, CancellationToken cancellationToken)
         {
             Assert.IsFalse(asyncWaiter == null, "Waiter should have been constructed");

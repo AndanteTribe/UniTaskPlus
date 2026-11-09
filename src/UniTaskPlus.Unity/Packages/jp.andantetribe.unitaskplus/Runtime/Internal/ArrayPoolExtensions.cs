@@ -13,6 +13,11 @@ namespace UniTaskPlus.Internal
         {
             if (array.Length < minimumLength)
             {
+                GrowCore(pool, ref array, minimumLength);
+            }
+
+            static void GrowCore(ArrayPool<T> pool, ref T[] array, int minimumLength)
+            {
                 var newArray = pool.Rent(minimumLength);
                 if (array.Length > 0)
                 {
