@@ -2,20 +2,14 @@ name: Upload Unity release assets
 on:
   release:
     types: [published]
-  workflow_dispatch:
-    inputs:
-      tag:
-        description: Existing mutable release tag matching package.json version
-        required: true
-        type: string
 
 permissions: {}
 
 env:
-  RELEASE_TAG: ${{ inputs.tag || github.event.release.tag_name }}
+  RELEASE_TAG: ${{ github.event.release.tag_name }}
 
 concurrency:
-  group: release-assets-${{ inputs.tag || github.event.release.tag_name }}
+  group: release-assets-${{ github.event.release.tag_name }}
   cancel-in-progress: false
 
 jobs:
@@ -67,3 +61,19 @@ jobs:
           organization-id: ${{ secrets.UPM_ORG_ID }}
           service-account-key-id: ${{ secrets.UPM_SERVICE_ACCOUNT_KEY_ID }}
           service-account-key-secret: ${{ secrets.UPM_SERVICE_ACCOUNT_KEY_SECRET }}
+
+  openupm:
+    needs: [unitypackage, signed-upm]
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      id-token: write
+    steps:
+      - name: Refresh OpenUPM and wait for publication
+        # ghasec-ignore: unpinned-action
+        uses: AndanteTribe/Actions/actions/openupm-action@main # zizmor: ignore[unpinned-uses] organization-managed action reference is intentionally tracked on @main
+        with:
+          package: jp.andantetribe.unitaskplus
+          tag: ${{ env.RELEASE_TAG }}
+          timeout-minutes: '15'
+          poll-interval-seconds: '15'
